@@ -1,3 +1,4 @@
+import os
 import lmdb
 import json
 import openai
@@ -6,7 +7,7 @@ import numpy as np
 client = openai.OpenAI()
 
 class VecterDB:
-    DB_DIR = "."
+    DB_DIR = os.path.dirname(__file__)
     
     def __init__(self):
         self.env = lmdb.open(VecterDB.DB_DIR, map_size=10485760*4)
@@ -62,7 +63,7 @@ class VecterDB:
     def __del__(self):
         self.env.close()
 
-    def get_pisible_answers(self, question, t_num):
+    def get_similer_history(self, question, t_num):
         num = self.get_num()
         QE = self.get_embedding(question)
         answers = []
@@ -74,4 +75,5 @@ class VecterDB:
             if len(answers) > t_num:
                 answers.pop()
         
-        return [[self.get_a(id), sim] for sim, id in answers]
+        return [{"question": self.get_q(id), "answer": self.get_a(id), "similarity": sim} for sim, id in answers]
+    
